@@ -1,6 +1,16 @@
 // python-learning-hub/lessons.js
 
-const lessons = [
+function createBaseLessons() {
+  // Inspect syntax in a separate namespace so comments and spacing do not affect grading.
+  function hasNode(runtime, source, predicate) {
+    const scope = runtime.toPy({ source });
+    try {
+      return runtime.runPython(`import ast\nany(${predicate} for node in ast.walk(ast.parse(source)))`, { globals: scope });
+    } finally {
+      scope.destroy();
+    }
+  }
+  return [
   {
     id: 1,
     level: 1,
@@ -22,12 +32,12 @@ Python 是一门语法简单、功能强大的编程语言，被广泛应用于�
 print("Hello, World!") # 输出文本
 print(2026)            # 输出数字，数字不需要加引号
 \`\`\``,
-    task: "在右侧编辑器中，编写一行代码，使用 `print()` 函数输出字符串 `Hello, Python!`（注意拼写、大小写以及最后的惊叹号）。",
+    task: "编写一行代码，使用 `print()` 函数输出字符串 `Hello, Python!`（注意拼写、大小写以及最后的惊叹号）。",
     hint: "检查拼写：必须精确输入 `print(\"Hello, Python!\")`。注意双引号和括号必须是半角英文符号。",
-    defaultCode: "# 在下方写下你的第一行 Python 代码并点击【运行代码】\n",
+    defaultCode: "# 在下方写下你的第一行 Python 代码并点击「运行」\n",
     solution: "print(\"Hello, Python!\")",
     validate: async (code, stdout, globals, pyodide) => {
-      if (!stdout.includes("Hello, Python!")) {
+      if (stdout.trimEnd() !== "Hello, Python!") {
         return {
           success: false,
           message: "控制台输出中没有找到 'Hello, Python!'，请检查拼写、大小写和标点符号。"
@@ -280,7 +290,7 @@ while count <= 5:
     defaultCode: "sum_val = 0\nnum = 1\n# 在下方使用 while 循环计算 1 到 100 的累加和\n",
     solution: "sum_val = 0\nnum = 1\nwhile num <= 100:\n    sum_val = sum_val + num\n    num = num + 1",
     validate: async (code, stdout, globals, pyodide) => {
-      if (!code.includes("while")) return { success: false, message: "本关要求必须使用 'while' 关键字实现循环！" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.While)")) return { success: false, message: "本关要求必须使用 'while' 关键字实现循环！" };
       if (!globals.has("sum_val")) return { success: false, message: "未检测到变量 'sum_val'。" };
 
       const sum_val = globals.get("sum_val");
@@ -314,7 +324,7 @@ for i in range(1, 4):
     defaultCode: "even_sum = 0\n# 使用 for 循环和 range 计算 1 到 50 的偶数和\n",
     solution: "even_sum = 0\nfor i in range(2, 52, 2):\n    even_sum = even_sum + i",
     validate: async (code, stdout, globals, pyodide) => {
-      if (!code.includes("for ")) return { success: false, message: "本关要求必须使用 'for' 关键字！" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.For)")) return { success: false, message: "本关要求必须使用 'for' 关键字！" };
       if (!globals.has("even_sum")) return { success: false, message: "未检测到变量 'even_sum'。" };
 
       const even_sum = globals.get("even_sum");
@@ -353,8 +363,8 @@ for i in range(1, 6):
     defaultCode: "nums = [3, 0, 7, -1, 10, -5, 8]\npositive_sum = 0\n# 使用 for 循环遍历 nums，遇到 0 时 continue，遇到负数时 break，否则累加到 positive_sum\n",
     solution: "nums = [3, 0, 7, -1, 10, -5, 8]\npositive_sum = 0\nfor n in nums:\n    if n == 0:\n        continue\n    if n < 0:\n        break\n    positive_sum = positive_sum + n",
     validate: async (code, stdout, globals, pyodide) => {
-      if (!code.includes("break")) return { success: false, message: "你需要使用 'break' 关键字在遇到负数时退出循环。" };
-      if (!code.includes("continue")) return { success: false, message: "你需要使用 'continue' 关键字在遇到 0 时跳过本轮循环。" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.Break)")) return { success: false, message: "你需要使用 'break' 关键字在遇到负数时退出循环。" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.Continue)")) return { success: false, message: "你需要使用 'continue' 关键字在遇到 0 时跳过本轮循环。" };
       if (!globals.has("positive_sum")) return { success: false, message: "未检测到变量 'positive_sum'。" };
 
       const psum = globals.get("positive_sum");
@@ -451,7 +461,7 @@ even_squares = [x ** 2 for x in range(1, 11) if x % 2 == 0]
         return { success: false, message: "div_by_three 过滤结果不正确，应该包含 [9, 36]。" };
       }
       
-      if (code.includes("append") || (code.split('\n').filter(l => l.trim().startsWith('for')).length > 0 && !code.includes('['))) {
+      if (!hasNode(pyodide, code, "isinstance(node, ast.ListComp)")) {
         return { success: false, message: "请使用列表推导式单行写法，不要使用传统的 for 循环和 append 叠加。" };
       }
 
@@ -533,7 +543,7 @@ for key, value in scores.items():
 
       if (globals.get("orange_count") !== 0) return { success: false, message: "orange_count 应当等于 0（因为字典里没有 orange 且设置了默认值为 0）。" };
       if (globals.get("apple_count") !== 10) return { success: false, message: "apple_count 应当等于 10。" };
-      if (!code.includes(".get(")) return { success: false, message: "本关要求必须使用 '.get()' 方法来进行安全读取！" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == 'get'")) return { success: false, message: "本关要求必须使用 '.get()' 方法来进行安全读取！" };
 
       return { success: true, message: "字典的高级方法应用成功！.get() 方法是日常开发中的守护神，能有效避免 KeyError。" };
     }
@@ -573,8 +583,8 @@ max_val = max(data)      # 常用内置函数：求最大值
       const min_score = globals.get("min_score");
       if (min_score !== 78) return { success: false, message: "最低分 min_score 应该是 78。" };
 
-      const us = globals.get("unique_scores");
-      if (typeof us.has !== 'function' || us.size !== 4) {
+      const correct = pyodide.runPython("isinstance(unique_scores, set) and unique_scores == {85, 92, 90, 78}");
+      if (!correct) {
         return { success: false, message: "unique_scores 应该是一个包含 4 个不重复分数的集合。" };
       }
       return { success: true, message: "通关！元组和集合能有效帮助我们规范和筛选数据！" };
@@ -832,14 +842,12 @@ sorted_users = sorted(users, key=lambda u: u["age"])
     solution: "students = [\n    {\"name\": \"Alice\", \"score\": 85},\n    {\"name\": \"Bob\", \"score\": 95},\n    {\"name\": \"Charlie\", \"score\": 75}\n]\nsorted_students = sorted(students, key=lambda s: s[\"score\"], reverse=True)",
     validate: async (code, stdout, globals, pyodide) => {
       if (!globals.has("sorted_students")) return { success: false, message: "未检测到变量 'sorted_students'。" };
-      if (!code.includes("lambda")) return { success: false, message: "本关要求必须配合使用 'lambda' 匿名函数进行排序！" };
-      if (!code.includes("reverse=True") && !code.includes("reverse = True")) {
-        return { success: false, message: "请记得开启降序参数 (reverse=True)！" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.Lambda)")) return { success: false, message: "本关要求必须配合使用 'lambda' 匿名函数进行排序！" };
+      if (!hasNode(pyodide, code, "isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'sorted'")) {
+        return { success: false, message: "请使用 sorted() 返回排序后的新列表。" };
       }
-
-      const res = globals.get("sorted_students").toJs();
-      if (res.length !== 3 || res[0].get("name") !== "Bob" || res[2].get("name") !== "Charlie") {
-        return { success: false, message: "排序结果顺序不正确，降序第一名应当是 Bob (95分)，最后一名是 Charlie (75分)。" };
+      if (!pyodide.runPython(`sorted_students == [{"name": "Bob", "score": 95}, {"name": "Alice", "score": 85}, {"name": "Charlie", "score": 75}]`)) {
+        return { success: false, message: "请保留三名学生的姓名和分数，并按分数从高到低排列。" };
       }
       return { success: true, message: "非常优秀！Lambda 配合 sorted 是对表格类、接口返回数据进行快速排布与筛选的利器！" };
     }
@@ -920,7 +928,7 @@ except ZeroDivisionError:
     solution: "def safe_division(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return \"Division by zero error!\"\n    except TypeError:\n        return \"Type error!\"",
     validate: async (code, stdout, globals, pyodide) => {
       if (!globals.has("safe_division")) return { success: false, message: "未定义函数 'safe_division'。" };
-      if (!code.includes("try:") || !code.includes("except")) {
+      if (!hasNode(pyodide, code, "isinstance(node, ast.Try) and node.handlers")) {
         return { success: false, message: "你必须使用 try-except 块来处理异常！" };
       }
 
@@ -1361,7 +1369,10 @@ with open("students.json", "r", encoding="utf-8") as f:
       return { success: true, message: "【阶段捷报】恭喜你完成前 30 个 Python 核心基础关卡！你已经独立实现了一个集面向对象、算法排序、JSON 和文件读写于一体的小型管理系统。接下来进入工程化、数据处理、Web、数据库和综合项目进阶篇。" };
     }
   }
-];
+  ];
+}
+
+const lessons = createBaseLessons();
 
 // Export lessons to window if in browser environment
 if (typeof window !== "undefined") {

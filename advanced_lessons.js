@@ -1,10 +1,6 @@
 // python-learning-hub/advanced_lessons.js
 
-(function () {
-  if (typeof lessons === "undefined") {
-    throw new Error("advanced_lessons.js must be loaded after lessons.js");
-  }
-
+function appendAdvancedLessons(lessons) {
   function makeLesson(spec) {
     return {
       id: spec.id,
@@ -20,7 +16,11 @@
           for (const req of spec.requireCode) {
             const token = Array.isArray(req) ? req[0] : req;
             const message = Array.isArray(req) ? req[1] : `本关需要在代码中使用 ${token}。`;
-            if (!code.includes(token)) return { success: false, message };
+            const sqlKeyword = /^[A-Z ]+$/.test(token.split(" ")[0]);
+            const present = sqlKeyword
+              ? code.toUpperCase().replace(/\s+/g, " ").includes(token.toUpperCase())
+              : code.includes(token);
+            if (!present) return { success: false, message };
           }
         }
 
@@ -73,7 +73,6 @@
       hint: "可以用 with open 写入模块文本。写完后 import math_tools，再调用 add。",
       defaultCode: "# 创建并导入自己的工具模块\n",
       solution: "with open(\"math_tools.py\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"def add(a, b):\\n    return a + b\\n\")\n\nimport math_tools\nmodule_result = math_tools.add(12, 30)",
-      requireCode: ["with open", "import math_tools"],
       requiredNames: ["module_result"],
       assertCode: `assert module_result == 42\nimport math_tools\nassert math_tools.add(1, 2) == 3`,
       failPrefix: "模块导入检查失败：",
@@ -128,7 +127,15 @@
       solution: "def normalize_score(score):\n    assert 0 <= score <= 100\n    return score / 100",
       requireCode: ["assert"],
       requiredNames: ["normalize_score"],
-      assertCode: `assert normalize_score(80) == 0.8\ntry:\n    normalize_score(120)\n    raise AssertionError("超出范围时应触发 AssertionError")\nexcept AssertionError:\n    pass`,
+      assertCode: `assert normalize_score(0) == 0 and normalize_score(100) == 1
+assert normalize_score(80) == 0.8
+for invalid in (-1, 101):
+    try:
+        normalize_score(invalid)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("范围外的分数应触发 AssertionError")`,
       failPrefix: "断言调试检查失败：",
       success: "不错！你会把关键假设写进函数里了。"
     }),
@@ -161,9 +168,11 @@
       hint: "函数签名里写 `name: str, age: int`，返回值提示写 `-> str`。",
       defaultCode: "# 编写带类型提示的 format_user 函数\n",
       solution: "def format_user(name: str, age: int) -> str:\n    return f\"{name} ({age})\"",
-      requireCode: ["-> str", ": int"],
       requiredNames: ["format_user"],
-      assertCode: `assert format_user("Alice", 20) == "Alice (20)"\nassert format_user.__annotations__["name"] is str\nassert format_user.__annotations__["age"] is int\nassert format_user.__annotations__["return"] is str`,
+      assertCode: `from typing import get_type_hints
+hints = get_type_hints(format_user)
+assert all(hints.get(key) is expected for key, expected in (("name", str), ("age", int), ("return", str)))
+assert format_user("Alice", 20) == "Alice (20)" and format_user("Bob", 31) == "Bob (31)"`,
       failPrefix: "类型提示检查失败：",
       success: "通关！清晰的函数接口是工程代码的开端。"
     }),
@@ -371,9 +380,11 @@
       hint: "先写文件，再 copyfile，最后 read。",
       defaultCode: "# 创建 profile.txt 并复制备份\n",
       solution: "import shutil\n\nwith open(\"profile.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"name=YYS\")\n\nshutil.copyfile(\"profile.txt\", \"profile.bak\")\nwith open(\"profile.bak\", \"r\", encoding=\"utf-8\") as f:\n    backup_text = f.read()",
-      requireCode: ["shutil.copyfile"],
+      requireCode: ["copyfile"],
       requiredNames: ["backup_text"],
-      assertCode: `assert backup_text == "name=YYS"`,
+      assertCode: `from pathlib import Path
+assert backup_text == "name=YYS"
+assert Path("profile.txt").read_text() == Path("profile.bak").read_text() == backup_text`,
       failPrefix: "文件备份检查失败：",
       success: "通关！动文件前先备份，工具就更可靠。"
     }),
@@ -596,7 +607,10 @@
       solution: "from urllib.parse import urlencode\n\nbase_url = \"https://api.example.com/search\"\nparams = {\"q\": \"python\", \"page\": 2}\nfull_url = base_url + \"?\" + urlencode(params)",
       requireCode: ["urlencode"],
       requiredNames: ["full_url"],
-      assertCode: `assert full_url == "https://api.example.com/search?q=python&page=2"`,
+      assertCode: `from urllib.parse import urlsplit, parse_qs
+url = urlsplit(full_url)
+assert (url.scheme, url.netloc, url.path, url.fragment) == ("https", "api.example.com", "/search", "")
+assert parse_qs(url.query, keep_blank_values=True) == {"q": ["python"], "page": ["2"]}`,
       failPrefix: "URL 参数检查失败：",
       success: "很好！你能构造规范的 API 请求地址了。"
     }),
@@ -816,13 +830,13 @@
       concept: "用户有多条任务、作者有多篇文章，这就是一对多关系。即使暂不启用外键约束，也要知道如何用 id 关联。",
       ability: "能通过 user_id 查询某个用户的所有任务。",
       example: "SELECT title FROM todos WHERE user_id=?",
-      task: "请创建 `users` 与 `todos` 两张表，插入用户 Alice 以及她的两个任务。查询 Alice 的任务标题列表，存入 `alice_todos`。",
+      task: "请创建 `users` 与 `todos` 两张表，插入用户 Alice 以及她的两个任务 learn 和 ship。查询 Alice 的任务标题列表，存入 `alice_todos`。",
       hint: "todos 表可包含 id, user_id, title 三列。",
       defaultCode: "# 使用 user_id 关联用户和任务\n",
       solution: "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE users (id INTEGER, name TEXT)\")\nconn.execute(\"CREATE TABLE todos (id INTEGER, user_id INTEGER, title TEXT)\")\nconn.execute(\"INSERT INTO users VALUES (?, ?)\", (1, \"Alice\"))\nconn.execute(\"INSERT INTO todos VALUES (?, ?, ?)\", (1, 1, \"learn\"))\nconn.execute(\"INSERT INTO todos VALUES (?, ?, ?)\", (2, 1, \"ship\"))\nalice_todos = [row[0] for row in conn.execute(\"SELECT title FROM todos WHERE user_id = ? ORDER BY id\", (1,))]",
       requireCode: ["CREATE TABLE users", "CREATE TABLE todos"],
       requiredNames: ["alice_todos"],
-      assertCode: `assert alice_todos == ["learn", "ship"]`,
+      assertCode: `assert sorted(alice_todos) == ["learn", "ship"]`,
       failPrefix: "一对多关系检查失败：",
       success: "通关！你能用数据库表达真实业务关系了。"
     }),
@@ -857,7 +871,13 @@
       defaultCode: "import sqlite3\n\n# 定义 UserRepository\n",
       solution: "import sqlite3\n\nclass UserRepository:\n    def __init__(self, conn):\n        self.conn = conn\n        self.conn.execute(\"CREATE TABLE IF NOT EXISTS users (name TEXT)\")\n    def add_user(self, name):\n        self.conn.execute(\"INSERT INTO users VALUES (?)\", (name,))\n    def list_users(self):\n        return [row[0] for row in self.conn.execute(\"SELECT name FROM users ORDER BY name\")]\n\nconn = sqlite3.connect(\":memory:\")\nrepo = UserRepository(conn)\nrepo.add_user(\"Bob\")\nrepo.add_user(\"Alice\")\nrepo_users = repo.list_users()",
       requiredNames: ["UserRepository", "repo_users"],
-      assertCode: `assert repo_users == ["Alice", "Bob"]`,
+      assertCode: `import sqlite3
+assert sorted(repo_users) == ["Alice", "Bob"]
+with sqlite3.connect(":memory:") as test_conn:
+    test_repo = UserRepository(test_conn)
+    assert test_repo.list_users() == []
+    test_repo.add_user("Cindy")
+    assert test_repo.list_users() == ["Cindy"]`,
       failPrefix: "Repository 检查失败：",
       success: "通关！数据库访问已经被你封装成可维护类了。"
     }),
@@ -892,7 +912,7 @@
       solution: "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE notes (title TEXT)\")\nfor title in [\"Python tips\", \"Java notes\", \"Python project\"]:\n    conn.execute(\"INSERT INTO notes VALUES (?)\", (title,))\npython_notes = [row[0] for row in conn.execute(\"SELECT title FROM notes WHERE title LIKE ? ORDER BY title\", (\"%Python%\",))]",
       requireCode: ["LIKE"],
       requiredNames: ["python_notes"],
-      assertCode: `assert python_notes == ["Python project", "Python tips"]`,
+      assertCode: `assert sorted(python_notes) == ["Python project", "Python tips"]`,
       failPrefix: "数据库搜索检查失败：",
       success: "通关！你能为应用添加基础搜索能力了。"
     }),
@@ -909,7 +929,11 @@
       defaultCode: "import sqlite3\n\nclass LibraryDB:\n    pass\n\n# 添加两本书并查询\n",
       solution: "import sqlite3\n\nclass LibraryDB:\n    def __init__(self):\n        self.conn = sqlite3.connect(\":memory:\")\n        self.conn.execute(\"CREATE TABLE books (title TEXT)\")\n    def add_book(self, title):\n        self.conn.execute(\"INSERT INTO books VALUES (?)\", (title,))\n    def list_books(self):\n        return [row[0] for row in self.conn.execute(\"SELECT title FROM books ORDER BY title\")]\n\nlibrary = LibraryDB()\nlibrary.add_book(\"Python\")\nlibrary.add_book(\"Flask\")\nbooks = library.list_books()",
       requiredNames: ["LibraryDB", "books"],
-      assertCode: `assert books == ["Flask", "Python"]`,
+      assertCode: `assert books == ["Flask", "Python"]
+test_library = LibraryDB()
+test_library.add_book("Zebra")
+test_library.add_book("Atlas")
+assert test_library.list_books() == ["Atlas", "Zebra"]`,
       failPrefix: "图书馆数据库检查失败：",
       success: "Level 10 通关！你已经能用数据库支撑一个小项目了。"
     }),
@@ -1083,7 +1107,13 @@
       solution: "def divide(a, b):\n    if b == 0:\n        raise ValueError(\"b cannot be zero\")\n    return a / b\n\nnormal_check = divide(6, 3) == 2\ntry:\n    divide(1, 0)\n    zero_check = False\nexcept ValueError:\n    zero_check = True\nself_checks = [normal_check, zero_check]",
       requireCode: ["raise ValueError"],
       requiredNames: ["divide", "self_checks"],
-      assertCode: `assert self_checks == [True, True]`,
+      assertCode: `assert self_checks == [True, True] and divide(9, 2) == 4.5
+try:
+    divide(3, 0)
+except ValueError as error:
+    assert str(error) == "b cannot be zero"
+else:
+    raise AssertionError("除数为零时应抛出 ValueError")`,
       failPrefix: "计算器质量检查失败：",
       success: "Level 11 通关！你已经开始用质量意识写功能。"
     }),
@@ -1202,7 +1232,15 @@
       defaultCode: "# 定义 CachedClient\n",
       solution: "class CachedClient:\n    def __init__(self, fetcher):\n        self.fetcher = fetcher\n        self.cache = {}\n    def get(self, key):\n        if key not in self.cache:\n            self.cache[key] = self.fetcher(key)\n        return self.cache[key]\n\ndef fake_fetcher(key):\n    return key.upper()\n\nclient = CachedClient(fake_fetcher)\nclient.get(\"a\")\ncached_value = client.get(\"a\")",
       requiredNames: ["CachedClient", "cached_value"],
-      assertCode: `assert cached_value == "A"\nassert client.cache == {"a": "A"}`,
+      assertCode: `assert cached_value == "A" and client.cache == {"a": "A"}
+calls = []
+def test_fetch(key):
+    calls.append(key)
+    return key.upper()
+test_client = CachedClient(test_fetch)
+for key in ("b", "b", "c"):
+    assert test_client.get(key) == key.upper()
+assert calls == ["b", "c"], "命中缓存时不应再次调用 fetcher"`,
       failPrefix: "API 缓存客户端检查失败：",
       success: "通关！你的接口工具开始考虑效率和稳定性了。"
     }),
@@ -1218,9 +1256,12 @@
       hint: "with open('page.html', 'w') 写入，再读回。",
       defaultCode: "# 定义 render_page 并写入 page.html\n",
       solution: "def render_page(title, body):\n    return f\"<html><body><h1>{title}</h1><p>{body}</p></body></html>\"\n\nhtml = render_page(\"Hello\", \"Welcome\")\nwith open(\"page.html\", \"w\", encoding=\"utf-8\") as f:\n    f.write(html)\nwith open(\"page.html\", \"r\", encoding=\"utf-8\") as f:\n    page_html = f.read()",
-      requireCode: ["with open"],
       requiredNames: ["render_page", "page_html"],
-      assertCode: `assert "<h1>Hello</h1>" in page_html\nassert "<p>Welcome</p>" in page_html`,
+      assertCode: `from pathlib import Path
+assert page_html == Path("page.html").read_text(encoding="utf-8")
+assert "<h1>Hello</h1>" in page_html and "<p>Welcome</p>" in page_html
+sample = render_page("Notes", "Today")
+assert "<h1>Notes</h1>" in sample and "<p>Today</p>" in sample`,
       failPrefix: "静态页面生成器检查失败：",
       success: "很好！你已经能把数据和模板变成实际文件输出。"
     }),
@@ -1254,15 +1295,13 @@
       defaultCode: "# 设计你的第一个独立项目计划\nproject_plan = {}\ngraduation_ready = False\n",
       solution: "project_plan = {\n    \"goal\": \"做一个个人记账工具\",\n    \"features\": [\"添加收支\", \"按分类统计\", \"导出月度报告\"],\n    \"data_model\": {\n        \"record\": [\"date\", \"category\", \"amount\", \"note\"]\n    },\n    \"milestones\": [\"完成命令行版本\", \"加入文件保存\", \"生成统计报告\"]\n}\ngraduation_ready = len(project_plan[\"features\"]) >= 3 and len(project_plan[\"milestones\"]) >= 2",
       requiredNames: ["project_plan", "graduation_ready"],
-      assertCode: `assert isinstance(project_plan.get("goal"), str) and project_plan["goal"]\nassert len(project_plan.get("features", [])) >= 3\nassert isinstance(project_plan.get("data_model"), dict)\nassert len(project_plan.get("milestones", [])) >= 2\nassert graduation_ready is True`,
+      assertCode: `assert isinstance(project_plan.get("goal"), str) and project_plan["goal"]\nassert isinstance(project_plan.get("features"), list) and len(project_plan["features"]) >= 3\nassert isinstance(project_plan.get("data_model"), dict)\nassert isinstance(project_plan.get("milestones"), list) and len(project_plan["milestones"]) >= 2\nassert graduation_ready is True`,
       failPrefix: "毕业项目规划检查失败：",
       success: "毕业通关！你已经完成从 Python 基础到独立项目规划的完整修炼路线。接下来，就真的可以选一个项目开工了。"
     })
   ];
 
   lessons.push(...advancedLessons);
+}
 
-  if (typeof window !== "undefined") {
-    window.lessons = lessons;
-  }
-})();
+appendAdvancedLessons(lessons);

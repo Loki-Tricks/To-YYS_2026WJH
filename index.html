@@ -4,39 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Python 修炼关卡 - 交互式学习平台</title>
-  <meta name="description" content="一个免安装、零门槛的 Python 交互式学习平台。通过米白色护眼主题、100个循序渐进的闯关任务以及内置的浏览器端 Python 运行环境，从基础语法一路练到独立开发。">
+  <meta name="description" content="一个免安装、零门槛的 Python 交互式学习平台。通过 100 个循序渐进的闯关任务和内置的浏览器端 Python 运行环境，从基础语法一路练到独立开发。">
   
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="styles.css?v=48">
+  <link rel="stylesheet" href="styles.css?v=52">
   
   <!-- Early global error handler (拦截脚本加载失败与运行时错误) -->
   <script>
     window.addEventListener('error', function(event) {
       // 过滤掉静态资源的 error 事件（由动态脚本加载器统一处理重试）
       if (event.target && (event.target.tagName === 'SCRIPT' || event.target.tagName === 'LINK')) {
-        console.warn("静态资源加载失败，正尝试切换备用节点:", event.target.src || event.target.href);
+        console.warn("静态资源加载失败：", event.target.src || event.target.href);
         return;
       }
       
       console.error("捕获到全局错误:", event.error || event.message);
       const detailBody = document.getElementById('lesson-detail-body');
       if (detailBody) {
-        detailBody.innerHTML = `
-          <div style="padding: 16px; background-color: var(--error-bg); border-left: 4px solid var(--error); border-radius: 4px; color: var(--error); font-family: monospace; font-size: 14px; line-height: 1.5;">
-            <h4 style="margin-bottom: 8px; font-weight: bold; color: var(--error);">❌ 页面运行环境错误 (JavaScript Error)</h4>
-            <p style="color: var(--text-main);"><strong>错误详情:</strong> ${event.message || (event.error && event.error.message)}</p>
-            <p><strong>错误位置:</strong> ${event.filename || '未知'}:${event.lineno || '0'}:${event.colno || '0'}</p>
-            <p style="margin-top: 12px; font-size: 12px; color: var(--text-muted);">这通常由于 CDN 资源加载失败或浏览器安全限制引起。请复制或截图此错误信息发送给我！</p>
-          </div>
-        `;
+        detailBody.textContent = '页面运行出错：' + (event.message || '请刷新页面后重试。');
       }
       const detailTitle = document.getElementById('lesson-detail-title');
       if (detailTitle) {
         detailTitle.innerText = "网页初始化失败";
-      }
-      const loaderText = document.getElementById('loader-text');
-      if (loaderText) {
-        loaderText.innerText = "脚本执行出错: " + (event.message || '请查看控制台');
       }
     }, true); // 使用 capture 捕获资源加载错误
   </script>
@@ -57,23 +46,23 @@
   </script>
 
   <!-- Password Lock Screen Overlay -->
-  <div class="lock-overlay" id="lock-overlay">
+  <section class="lock-overlay" id="lock-overlay" aria-labelledby="gift-heading">
     <div class="lock-card">
-      <div class="lock-icon">🎁</div>
-      <h2 class="lock-title">专属定制 Python 修炼场</h2>
-      <p class="lock-subtitle">这是一份为你特别定制的生日礼物 🎂<br>输入解锁暗号开启你的 Python 修炼之旅：</p>
-      
-      <div class="lock-input-group">
-        <input type="password" id="lock-password-input" class="lock-input" placeholder="输入解锁暗号..." autofocus>
-        <button id="lock-submit-btn" class="lock-btn">🔑 解锁修炼场</button>
-      </div>
-      <div id="lock-error-msg" class="lock-error">❌ 暗号不对哦，再试一次吧！</div>
-      
-      <div class="lock-footer">
-        Designed by WJH
+      <img class="gift-cover" src="assets/birthday-cover.jpg" alt="纸面插画：复古电脑、生日礼物和一支点亮的蜡烛" width="720" height="1080">
+      <div class="gift-letter">
+        <p class="gift-to">To YYS</p>
+        <h1 class="lock-title" id="gift-heading">你的 Python<br>修炼手册<span>。</span></h1>
+        <p class="lock-subtitle">生日快乐！从第一行代码开始，<br>这里有为你准备的 100 个小挑战。</p>
+        <form id="unlock-form">
+          <label for="lock-password-input">解锁暗号</label>
+          <input id="lock-password-input" class="lock-input" type="password" autocomplete="off" placeholder="输入你的名字首字母" aria-describedby="lock-error-msg">
+          <p id="lock-error-msg" class="lock-error" role="alert">暗号不对，再试一次。</p>
+          <button id="lock-submit-btn" class="lock-btn" type="submit">打开修炼手册 <span aria-hidden="true">→</span></button>
+        </form>
+        <p class="gift-from">From WJH</p>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- Floating Canvas for Confetti Fireworks -->
   <canvas id="confetti-canvas"></canvas>
@@ -85,34 +74,43 @@
     <!-- Top Navigation Header -->
     <header class="app-header">
       <div class="brand-section">
-        <div class="logo-icon">Py</div>
-        <h1 class="logo-text">Python <span>修炼关卡</span></h1>
+        <div class="logo-icon" aria-hidden="true">›_</div>
+        <h1 class="logo-text">Python <span>修炼手册</span></h1>
       </div>
       
       <!-- Global Progress Bar -->
-      <div class="progress-area">
-        <span class="progress-label" id="progress-header-label">修炼进度: 0/100 关</span>
-        <div class="progress-bar-outer">
-          <div class="progress-bar-inner" id="progress-bar"></div>
+      <div class="header-status">
+        <div class="progress-area">
+          <span class="progress-label" id="progress-header-label">修炼进度: 0/100 关</span>
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner" id="progress-bar"></div>
+          </div>
+          <span class="progress-percentage" id="progress-pct">0%</span>
         </div>
-        <span class="progress-percentage" id="progress-pct">0%</span>
+        <div class="toast-container" role="status" id="toast-container"></div>
       </div>
-      
+
       <!-- Sound & Settings Buttons -->
       <div class="header-actions">
-        <button class="btn-icon" id="btn-theme" title="切换主题">🌙</button>
-        <button class="btn-icon" id="btn-lock" title="锁定修炼场">🔒</button>
-        <button class="btn-icon" id="btn-sound" title="切换音效">🔊</button>
-        <button class="btn-icon" id="btn-reset-progress" title="重置学习进度">🔄</button>
+        <button class="btn-icon" id="btn-theme" aria-label="深色主题" title="切换主题"><span class="utility-glyph" aria-hidden="true"></span></button>
+        <button class="btn-icon" id="btn-lock" aria-label="锁定修炼场" title="锁定修炼场"><span class="utility-glyph" aria-hidden="true"></span></button>
+        <button class="btn-icon" id="btn-sound" aria-label="音效" title="切换音效"><span class="utility-glyph" aria-hidden="true"></span></button>
+        <button class="btn-icon" id="btn-reset-progress" aria-label="重置学习进度" title="重置学习进度"><span class="utility-glyph" aria-hidden="true"></span></button>
       </div>
     </header>
 
     <!-- Main Workspace Dashboard -->
-    <main class="dashboard-main">
+    <nav class="mobile-nav" aria-label="学习区域">
+      <button type="button" data-view="map" aria-controls="sidebar-lessons">目录</button>
+      <button type="button" data-view="lesson" aria-controls="content-panel" aria-pressed="true">读题</button>
+      <button type="button" data-view="code" aria-controls="coding-panel">写代码</button>
+    </nav>
+    <main class="dashboard-main" data-view="lesson">
       
       <!-- Left sidebar: Level map -->
-      <aside class="sidebar-map" id="sidebar-lessons">
-        <div class="sidebar-title">关卡地图</div>
+      <aside class="sidebar-map" id="sidebar-lessons" aria-label="课程目录">
+        <h2 class="sidebar-title">课程目录</h2>
+        <div id="chapter-list"></div>
         <!-- Level groups will be rendered dynamically here -->
       </aside>
 
@@ -120,47 +118,54 @@
       <section class="content-panel" id="content-panel">
         <div class="lesson-content">
           <!-- Lesson details rendering target -->
-          <h3 id="lesson-detail-title">加载中...</h3>
-          <div id="lesson-detail-body">
-            <p>正在努力为您准备精彩的教学内容...</p>
-          </div>
-          
+          <p class="lesson-location" id="lesson-location"></p>
+          <h2 id="lesson-detail-title" tabindex="-1">加载中…</h2>
           <!-- Dynamic Task Requirement Box -->
           <div class="task-card">
+            <h3>本关任务</h3>
             <p class="task-description" id="task-text">请阅读上方教学说明，任务稍后显示在下方。</p>
             
             <!-- Foldable Hint panel -->
             <div class="hint-accordion">
-              <button class="hint-trigger" id="btn-hint">
-                💡 <span id="btn-hint-text">查看提示</span>
+              <button class="hint-trigger" id="btn-hint" aria-expanded="false" aria-controls="hint-content">
+                <span id="btn-hint-text">查看提示</span>
               </button>
               <div class="hint-content" id="hint-content">
                 这里是本关的贴心小提示。
               </div>
             </div>
           </div>
+          <div id="lesson-detail-body"></div>
         </div>
       </section>
 
       <!-- Right: Interactive Code Editor & Console Terminal -->
-      <section class="workspace-panel">
+      <section class="workspace-panel" id="coding-panel" aria-label="编程工作区">
         
-        <!-- Pyodide Engine Initial Loading Screen -->
-        <div class="loading-overlay" id="pyodide-loader">
-          <div class="spinner"></div>
-          <div class="loading-text" id="loader-text">正在初始化 Python 编译器与编辑器...</div>
-        </div>
-        
+        <!-- Floating Answer Viewer -->
+        <section class="answer-panel" id="answer-panel" aria-hidden="true">
+          <div class="answer-panel-header" >
+            <div class="answer-panel-title">
+              <span id="answer-panel-title-text">参考答案</span>
+            </div>
+            <button class="answer-panel-close" id="btn-answer-panel-close" title="取消查看答案">×</button>
+          </div>
+          <div class="answer-panel-body">
+            <pre class="answer-code-view"><code id="answer-code-view"></code></pre>
+          </div>
+        </section>
+
         <!-- Monaco Editor Panel -->
         <div class="editor-container">
           <div class="editor-header">
             <div class="editor-title">
-              💻 <span>Python 编辑器</span>
+              <span class="utility-glyph file-symbol" aria-hidden="true">&#xea7b;</span> <span>练习.py</span>
             </div>
             <div class="editor-actions">
-              <button class="btn btn-secondary" id="btn-focus-code">↗ 专注代码</button>
-              <button class="btn btn-secondary" id="btn-reveal-solution">💡 查看答案</button>
-              <button class="btn btn-primary" id="btn-run">⚡ 运行代码</button>
+              <button class="btn btn-secondary" id="btn-focus-code">专注模式</button>
+              <button class="btn btn-secondary" id="btn-reveal-solution" aria-controls="answer-panel" aria-expanded="false">参考答案</button>
+              <button class="btn btn-primary" id="btn-run" title="运行代码 (⌘/Ctrl + Enter)">▷ 运行</button>
+              <button class="btn btn-secondary stop-run" hidden>■ 停止</button>
             </div>
           </div>
           <div class="editor-body" id="monaco-editor-body">
@@ -173,20 +178,20 @@
           <div class="stdin-container">
             <div class="stdin-header">
               <div class="stdin-title">
-                📥 <span>标准输入 (stdin)</span>
+                <span>标准输入</span> <small>stdin</small>
               </div>
-              <button class="btn-console-clear" id="btn-clear-stdin">清空输入</button>
+              <button class="btn-console-clear" id="btn-clear-stdin" aria-label="清空标准输入">清空</button>
             </div>
-            <textarea id="stdin-input" class="stdin-input" spellcheck="false" placeholder="需要 input() 时，在这里按行输入。"></textarea>
+            <textarea aria-label="标准输入" id="stdin-input" class="stdin-input" spellcheck="false" placeholder="需要 input() 时，在这里按行输入。"></textarea>
           </div>
 
           <div class="console-container">
             <div class="console-header">
               <div class="console-title">
-                📟 <span>控制台输出 (Terminal)</span>
+                <span>运行结果</span> <small>console</small>
               </div>
               <div class="console-actions">
-                <button class="btn-console-clear" id="btn-clear-console">清空控制台</button>
+                <button class="btn-console-clear" id="btn-clear-console" aria-label="清空运行结果">清空</button>
               </div>
             </div>
             <div class="console-body" id="console-log">
@@ -198,7 +203,7 @@
         <!-- Interactive Run Options -->
         <div class="submit-action-row">
           <button class="btn btn-success btn-submit-wide" id="btn-submit">
-            🚀 提交验证，冲向下一关！
+            提交验证 <span aria-hidden="true">→</span>
           </button>
         </div>
 
@@ -209,30 +214,15 @@
 
   <!-- Level Success Confirmation Modal -->
   <div class="modal-overlay" id="modal-overlay">
-    <div class="success-modal">
+    <div class="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-heading">
       <div class="modal-icon">🎉</div>
-      <h2 class="modal-title">恭喜通关！</h2>
+      <h2 class="modal-title" id="success-heading">恭喜通关！</h2>
       <p class="modal-text" id="modal-custom-text">你的 Python 魔法生效了！</p>
       <button class="btn btn-success modal-close-btn" id="btn-close-modal">
         继续下一关
       </button>
     </div>
   </div>
-
-  <!-- Floating Answer Viewer -->
-  <section class="answer-panel" id="answer-panel" aria-hidden="true">
-    <div class="answer-panel-header" id="answer-panel-drag-handle">
-      <div class="answer-panel-title">
-        <span>💡</span>
-        <span id="answer-panel-title-text">参考答案</span>
-      </div>
-      <button class="answer-panel-close" id="btn-answer-panel-close" title="取消查看答案">×</button>
-    </div>
-    <div class="answer-panel-body">
-      <pre class="answer-code-view"><code id="answer-code-view"></code></pre>
-    </div>
-    <div class="answer-panel-resize" id="answer-panel-resize-handle" aria-hidden="true"></div>
-  </section>
 
   <!-- Focused Code Workspace -->
   <div class="focus-modal" id="focus-modal" aria-hidden="true">
@@ -243,7 +233,8 @@
           <span>Python 编辑器 · 单关练习</span>
         </div>
         <div class="focus-actions">
-          <button class="btn btn-primary" id="btn-focus-run">▶ 运行</button>
+          <button class="btn btn-primary" id="btn-focus-run">▷ 运行</button>
+              <button class="btn btn-secondary stop-run" hidden>■ 停止</button>
           <button class="btn-icon focus-close" id="btn-focus-close" title="关闭专注模式">×</button>
         </div>
       </header>
@@ -257,7 +248,7 @@
                 <em>stdin</em>
               </div>
             </div>
-            <textarea id="focus-stdin-input" class="stdin-input" spellcheck="false" placeholder="需要 input() 时，在这里按行输入。"></textarea>
+            <textarea aria-label="专注模式标准输入" id="focus-stdin-input" class="stdin-input" spellcheck="false" placeholder="需要 input() 时，在这里按行输入。"></textarea>
           </div>
           <div class="console-container focus-console-panel">
             <div class="console-header">
@@ -286,12 +277,17 @@
     </div>
   </div>
 
-  <!-- Toast Notification Area -->
-  <div class="toast-container" id="toast-container"></div>
+
 
   <!-- Script tags injection -->
-  <script src="lessons.js?v=45"></script>
-  <script src="advanced_lessons.js?v=2"></script>
-  <script src="app.js?v=51"></script>
+  <script src="vendor/marked.min.js"></script>
+  <script src="runtime.js?v=3"></script>
+  <script src="lessons.js?v=48"></script>
+  <script src="advanced_lessons.js?v=4"></script>
+  <script src="vendor/monaco/vs/loader.js"></script>
+  <script src="ui/learning-store.js"></script>
+  <script src="ui/code-editor.js?v=2"></script>
+  <script src="ui/python-runner.js"></script>
+  <script src="app.js?v=55"></script>
 </body>
 </html>

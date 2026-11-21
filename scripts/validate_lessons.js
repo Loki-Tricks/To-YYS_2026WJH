@@ -9,6 +9,7 @@ const REQUIRED_FIELDS = [
   "id",
   "level",
   "title",
+  "description",
   "task",
   "hint",
   "defaultCode",
@@ -17,7 +18,7 @@ const REQUIRED_FIELDS = [
 ];
 
 function usage() {
-  console.log("Usage: node scripts/validate_lessons.js [path/to/lessons.js] [path/to/advanced_lessons.js]");
+  console.log("Usage: node scripts/validate_lessons.js [--runtime] [path/to/lessons.js] [path/to/advanced_lessons.js]");
 }
 
 function loadLessons(lessonPaths) {
@@ -69,30 +70,6 @@ function findPython() {
   return null;
 }
 
-function compileSolution(python, source, filename) {
-  const compiler = [
-    "import sys",
-    "source = sys.stdin.read()",
-    "filename = sys.argv[1] if len(sys.argv) > 1 else '<solution>'",
-    "try:",
-    "    compile(source, filename, 'exec')",
-    "except SyntaxError as exc:",
-    "    print(f'{exc.msg} at line {exc.lineno}, offset {exc.offset}', file=sys.stderr)",
-    "    if exc.text:",
-    "        print(exc.text.rstrip(), file=sys.stderr)",
-    "    sys.exit(1)",
-    "except Exception as exc:",
-    "    print(str(exc), file=sys.stderr)",
-    "    sys.exit(1)"
-  ].join("\n");
-
-  return spawnSync(python.command, [...python.args, "-c", compiler, filename], {
-    input: source,
-    encoding: "utf8",
-    maxBuffer: 1024 * 1024
-  });
-}
-
 function addIssue(issues, lessonLabel, message) {
   issues.push({ lessonLabel, message });
 }
@@ -142,7 +119,7 @@ function validateLessonShape(lessons, issues) {
       addIssue(issues, lesson.id ? `lesson id ${lesson.id}` : lessonLabel, "level must be an integer.");
     }
 
-    for (const field of ["title", "task", "hint", "defaultCode", "solution"]) {
+    for (const field of ["title", "description", "task", "hint", "defaultCode", "solution"]) {
       if (Object.prototype.hasOwnProperty.call(lesson, field) && typeof lesson[field] !== "string") {
         addIssue(issues, lesson.id ? `lesson id ${lesson.id}` : lessonLabel, `${field} must be a string.`);
       }
@@ -159,20 +136,30 @@ function validateSolutionsCompile(lessons, python, issues) {
     return;
   }
 
-  lessons.forEach((lesson, index) => {
-    if (!lesson || typeof lesson !== "object" || typeof lesson.solution !== "string") {
-      return;
-    }
-
-    const id = Number.isInteger(lesson.id) ? lesson.id : index + 1;
-    const filename = `<lesson ${id} solution>`;
-    const result = compileSolution(python, lesson.solution, filename);
-
-    if (result.status !== 0) {
-      const stderr = `${result.stderr || result.stdout || "Python compile failed."}`.trim();
-      addIssue(issues, `lesson id ${id}`, `solution does not compile: ${stderr}`);
-    }
+  const sources = lessons.flatMap((lesson, index) => {
+    if (typeof lesson?.solution !== "string") return [];
+    return [{ id: Number.isInteger(lesson.id) ? lesson.id : index + 1, source: lesson.solution }];
   });
+  const compiler = `
+import json, sys
+errors = []
+for lesson in json.load(sys.stdin):
+    try:
+        compile(lesson["source"], f"<lesson {lesson['id']} solution>", "exec")
+    except (SyntaxError, ValueError) as error:
+        errors.append([lesson["id"], str(error)])
+print(json.dumps(errors))
+`;
+  const result = spawnSync(python.command, [...python.args, "-c", compiler], {
+    input: JSON.stringify(sources), encoding: "utf8", maxBuffer: 1024 * 1024
+  });
+  if (result.status !== 0) {
+    addIssue(issues, "global", result.error?.message || result.stderr || "Python compilation failed.");
+    return;
+  }
+  for (const [id, message] of JSON.parse(result.stdout)) {
+    addIssue(issues, `lesson id ${id}`, `solution does not compile: ${message}`);
+  }
 }
 
 function printReport({ lessons, lessonPaths, python, issues }) {
@@ -210,7 +197,9 @@ function main() {
   if (fs.existsSync(defaultAdvancedPath)) {
     defaultPaths.push(defaultAdvancedPath);
   }
-  const lessonPaths = (process.argv.length > 2 ? process.argv.slice(2) : defaultPaths)
+  const runtimeCheck = process.argv.includes("--runtime");
+  const paths = process.argv.slice(2).filter(arg => arg !== "--runtime");
+  const lessonPaths = (paths.length ? paths : defaultPaths)
     .map((lessonPath) => path.resolve(lessonPath));
   const issues = [];
   let lessons;
@@ -237,8 +226,22 @@ function main() {
     validateSolutionsCompile(lessons, python, issues);
   }
 
+  if (runtimeCheck && !issues.length) {
+    const runner = path.join(__dirname, "check_solution.js");
+    for (const [index, lesson] of lessons.entries()) {
+      const result = spawnSync(process.execPath, [runner, String(index), ...lessonPaths], {
+        timeout: 45000, encoding: "utf8"
+      });
+      if (result.status !== 0) {
+        addIssue(issues, `lesson id ${lesson.id}`, result.error?.message || result.stderr || "Runtime check failed.");
+      }
+    }
+    if (!issues.length) console.log(`[OK] ${lessons.length} reference solutions passed and empty answers were rejected in Pyodide.`);
+  }
+
   printReport({ lessons, lessonPaths, python, issues });
   return issues.length === 0 ? 0 : 1;
 }
 
-process.exitCode = main();
+module.exports = { loadLessons };
+if (require.main === module) process.exitCode = main();
