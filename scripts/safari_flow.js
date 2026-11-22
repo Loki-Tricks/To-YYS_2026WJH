@@ -171,11 +171,22 @@
         editorOptions.fontSize === (width <= 640 ? 16 : 15), 'Editor sizing did not follow viewport at ' + width);
       if (width <= 640) {
         const run = element('btn-run').getBoundingClientRect();
+        const submit = element('btn-submit').getBoundingClientRect();
+        const focus = element('btn-focus-code').getBoundingClientRect();
         const answer = element('btn-reveal-solution').getBoundingClientRect();
-        check(run.height >= 44 && answer.height >= 44 && run.left - answer.right >= 6,
-          'Mobile toolbar targets crowded at ' + width);
+        check(run.height >= 44 && submit.height >= 44 && run.top === submit.top && submit.left - run.right >= 8,
+          'Mobile run and submit actions misaligned at ' + width);
+        check(focus.height >= 44 && answer.height >= 44 && focus.top === answer.top && answer.left - focus.right >= 6,
+          'Mobile editor tools crowded at ' + width);
+        for (const id of ['btn-clear-stdin', 'btn-clear-console']) {
+          const target = element(id).getBoundingClientRect();
+          check(target.width >= 44 && target.height >= 44, 'Small mobile clear button: ' + id);
+        }
+        check(element('editor-lesson-number').offsetWidth > 0, 'Mobile editor missing lesson number');
         check(frame.contentWindow.getComputedStyle(element('stdin-input')).fontSize === '16px',
           'Mobile input font too small');
+      } else {
+        check(!!element('btn-run').closest('.editor-actions'), 'Run missing from desktop toolbar');
       }
       const submitRect = element('btn-submit').getBoundingClientRect();
       check(submitRect.width > 0 && submitRect.right <= width + 1, 'Submit clipped or hidden at ' + width);

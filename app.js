@@ -321,6 +321,7 @@ function loadLesson(index) {
     if (document.getElementById('sidebar-lessons').offsetWidth) revealActiveLesson();
   }
   document.getElementById('lesson-location').textContent = chapterNames[lesson.level] + '　/　第 ' + lesson.id + ' 关';
+  document.getElementById('editor-lesson-number').textContent = `第 ${lesson.id} 关`;
   const heading = document.getElementById('lesson-detail-title');
   const { name, topic } = lessonHeading(lesson);
   heading.textContent = name;
@@ -735,6 +736,22 @@ function toggleSound() {
   }
 }
 
+function bindRunButtonLayout() {
+  const phone = window.matchMedia('(max-width: 640px)');
+  const toolbar = document.querySelector('.editor-actions');
+  const footer = document.querySelector('.submit-action-row');
+  const run = document.getElementById('btn-run');
+  const stop = toolbar.querySelector('.stop-run');
+  function arrange() {
+    const focused = document.activeElement;
+    if (phone.matches) footer.prepend(run, stop);
+    else toolbar.append(run, stop);
+    if (focused === run || focused === stop) focused.focus({ preventScroll: true });
+  }
+  arrange();
+  phone.addEventListener('change', arrange);
+}
+
 // The on-screen keyboard can shrink and pan the visual viewport while the layout viewport stays tall.
 function bindEditingViewport() {
   const viewport = window.visualViewport;
@@ -869,6 +886,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   initAnswerPanelControls();
   bindFocusEditorShortcuts();
+  bindRunButtonLayout();
   bindEditingViewport();
 
   // Theme toggle button action

@@ -155,6 +155,7 @@ button { color: inherit; }
   padding: 10px 13px; background: var(--soft); border-bottom: 1px solid var(--rule);
 }
 .editor-title { font: 600 13px var(--mono); white-space: nowrap; }
+#editor-lesson-number { display: none; }
 .file-symbol { color: var(--primary); font-size: 18px; }
 #btn-run, #btn-focus-run, .stop-run { min-width: 5.1em; }
 .editor-actions { gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
@@ -303,9 +304,13 @@ button { color: inherit; }
   .mobile-nav { margin-top: 7px; }
   .mobile-nav button { min-height: 44px; }
   .lesson-content { padding: 20px 17px; }
-  .btn-submit-wide { width: 100%; justify-content: center; }
+  .submit-action-row { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 8px; }
+  .submit-action-row .btn { min-width: 0; min-height: 46px; font-size: .9375rem; }
+  .btn-submit-wide { justify-content: center; gap: 8px; }
   .workspace-panel { gap: 8px; grid-template-rows: minmax(150px, 1.1fr) minmax(125px, .7fr) auto; }
   .editor-header { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
+  .editor-filename { display: none; }
+  #editor-lesson-number { display: inline; font: 600 .875rem var(--sans); }
   .editor-actions { gap: 6px; margin-inline-start: auto; }
   .editor-actions button, .focus-actions button, .modal-close-btn { min-height: 44px; }
   .editor-actions button { padding: 6px 8px; font-size: .875rem; }
@@ -314,6 +319,9 @@ button { color: inherit; }
     gap: 6px; grid-template-rows: minmax(133px, .85fr) minmax(122px, 1fr) minmax(89px, .56fr) auto;
   }
   .runtime-panels { gap: 6px; grid-template-columns: minmax(118px, .82fr) minmax(0, 1.18fr); }
+  .runtime-panels .stdin-header, .runtime-panels .console-header { padding: 0 3px 0 9px; }
+  .btn-console-clear { min-width: 44px; min-height: 44px; font-size: .8125rem; }
+  .console-body, .answer-code-view { font-size: .9375rem; line-height: 1.55; }
   .stdin-title small, .console-title small, .focus-io-column em { display: none; }
   .focus-modal { padding: 5px; }
   .focus-dialog { width: 100%; height: 96dvh; }
@@ -339,9 +347,6 @@ button { color: inherit; }
   .brand-section { gap: 6px; }
   .header-actions { gap: 0; }
   .header-actions .btn-icon { width: 32px; }
-  .editor-header .editor-title { display: none; }
-  .editor-actions { width: 100%; }
-  .editor-actions button { flex: 1; }
 }
 /* Keep the controls and the editing surface inside Safari's visible area while typing. */
 .editing-viewport .app-container, .editing-viewport .focus-modal,
@@ -372,6 +377,10 @@ button { color: inherit; }
 .editing-viewport .answer-panel.active { grid-area: auto / 1 / auto / -1; min-height: 132px; }
 .editing-viewport .focus-modal { padding: 4px; }
 .editing-viewport .focus-dialog { height: 100%; width: 100%; }
+@media (max-width: 640px) {
+  .editing-viewport .submit-action-row { grid-template-columns: auto auto; gap: 4px; }
+  .editing-viewport .submit-action-row .btn { min-height: 44px; padding: 4px 8px; font-size: .875rem; }
+}
 @media (min-width: 641px) {
   .editing-viewport .workspace-panel, .editing-viewport .workspace-panel:has(.answer-panel.active) {
     grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); grid-template-rows: auto minmax(64px, 1fr);
