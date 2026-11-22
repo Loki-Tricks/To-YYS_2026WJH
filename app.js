@@ -248,7 +248,7 @@ async function runCode(options = {}) {
       triggerConfetti();
       showSuccessModal(result.message);
     } else {
-      appendConsole('执行完成 (Exit Code: 0)', 'system', consoleTarget);
+      appendConsole('执行完成，退出码 0', 'system', consoleTarget);
     }
   } catch (error) {
     appendConsole(error.message, 'error', consoleTarget);
