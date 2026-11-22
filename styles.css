@@ -273,12 +273,15 @@ button { color: inherit; }
   .progress-label, .progress-percentage { font-size: .75rem; }
   .progress-bar-outer { flex: 1; }
   .mobile-nav { margin-top: 7px; }
+  .mobile-nav button { min-height: 44px; }
   .lesson-content { padding: 20px 17px; }
   .btn-submit-wide { width: 100%; justify-content: center; }
   .workspace-panel { gap: 8px; grid-template-rows: minmax(150px, 1.1fr) minmax(125px, .7fr) auto; }
-  .editor-header { flex-wrap: wrap; padding: 7px 8px; gap: 4px; }
-  .editor-actions { gap: 3px; }
-  .editor-actions button { padding: 6px 7px; }
+  .editor-header { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
+  .editor-actions { gap: 6px; margin-inline-start: auto; }
+  .editor-actions button, .focus-actions button, .modal-close-btn { min-height: 44px; }
+  .editor-actions button { padding: 6px 8px; font-size: .875rem; }
+  .stdin-input, .focus-code-editor, .fallback-code-editor { font-size: 1rem; }
   .runtime-panels { gap: 6px; grid-template-columns: minmax(118px, .82fr) minmax(0, 1.18fr); }
   .stdin-title small, .console-title small { display: none; }
   .focus-modal { padding: 5px; }
@@ -293,6 +296,11 @@ button { color: inherit; }
   .lock-title { font-size: 32px; }
   .lock-title br { display: none; }
   .lock-subtitle { margin: 10px 0 14px; font-size: 13px; }
+}
+@media (max-width: 360px) {
+  .editor-header .editor-title { display: none; }
+  .editor-actions { width: 100%; }
+  .editor-actions button { flex: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }

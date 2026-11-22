@@ -54,12 +54,18 @@ function createCodeEditor(host, { value, onEdit, onRun }) {
     const end = field.selectionEnd;
     try {
       field.remove();
+      const phone = window.matchMedia('(max-width: 640px)');
+      const typeOptions = () => ({
+        fontSize: phone.matches ? 16 : 15,
+        wordWrap: phone.matches ? 'on' : 'off'
+      });
       enhanced = monaco.editor.create(host, {
         value: field.value, language: 'python', theme: defineCourseTheme(), automaticLayout: true,
-        fontSize: 15, lineHeight: 25, fontFamily: "Menlo, Consolas, monospace",
+        ...typeOptions(), lineHeight: 25, fontFamily: "Menlo, Consolas, monospace",
         minimap: { enabled: false }, scrollBeyondLastLine: false, lineNumbersMinChars: 2,
         padding: { top: 16, bottom: 12 }, ariaLabel: 'Python 代码编辑器'
       });
+      phone.addEventListener('change', () => enhanced?.updateOptions(typeOptions()));
       enhanced.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, onRun);
       enhanced.onDidChangeModelContent(() => onEdit(enhanced.getValue()));
       if (focused) {

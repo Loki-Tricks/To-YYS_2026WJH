@@ -275,12 +275,14 @@ function hideSuccessModal() {
   const modal = document.getElementById('modal-overlay');
   document.querySelector('.app-container').inert = false;
   modal.classList.remove('active');
-  document.getElementById('btn-submit').focus();
   playSound('click');
   
   // Auto-advance to next lesson if available
   if (currentLessonIndex < lessons.length - 1) {
     loadLesson(currentLessonIndex + 1);
+    document.getElementById('lesson-detail-title').focus({ preventScroll: true });
+  } else {
+    document.getElementById('btn-submit').focus();
   }
 }
 

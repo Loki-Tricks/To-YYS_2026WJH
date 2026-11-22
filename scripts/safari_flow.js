@@ -79,7 +79,7 @@
     verifyPalette();
     await verifyEditorSurface();
     click('btn-sound');
-    for (const width of [320, 390, 720, 1024, 1025, 1181, 1440]) {
+    for (const width of [320, 360, 375, 390, 720, 1024, 1025, 1181, 1440]) {
       frame.style.width = width + 'px';
       await delay(80);
       const nav = frame.contentDocument.querySelector('.mobile-nav');
@@ -98,6 +98,17 @@
         const control = element(id).getBoundingClientRect();
         check(control.width > 0 && control.left >= bounds.left && control.right <= bounds.right + 1,
           'Workspace control clipped: ' + id + ' at ' + width);
+      }
+      const editorOptions = read('monaco.editor.getEditors()[0].getRawOptions()');
+      check(editorOptions.wordWrap === (width <= 640 ? 'on' : 'off') &&
+        editorOptions.fontSize === (width <= 640 ? 16 : 15), 'Editor sizing did not follow viewport at ' + width);
+      if (width <= 640) {
+        const run = element('btn-run').getBoundingClientRect();
+        const answer = element('btn-reveal-solution').getBoundingClientRect();
+        check(run.height >= 44 && answer.height >= 44 && run.left - answer.right >= 6,
+          'Mobile toolbar targets crowded at ' + width);
+        check(frame.contentWindow.getComputedStyle(element('stdin-input')).fontSize === '16px',
+          'Mobile input font too small');
       }
       const submitRect = element('btn-submit').getBoundingClientRect();
       check(submitRect.width > 0 && submitRect.right <= width + 1, 'Submit clipped or hidden at ' + width);
@@ -157,6 +168,7 @@
       }
       await submit(solution, index + 1);
       click('btn-close-modal');
+      if (index < 99) check(frame.contentDocument.activeElement === element('lesson-detail-title'), 'Focus missed next lesson');
       if ((index + 1) % 20 === 0) await report({ message: 'Passed ' + (index + 1) + ' lessons' });
     }
     await navigate(true);

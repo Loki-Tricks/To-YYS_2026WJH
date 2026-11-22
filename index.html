@@ -7,7 +7,7 @@
   <meta name="description" content="一个免安装、零门槛的 Python 交互式学习平台。通过 100 个循序渐进的闯关任务和内置的浏览器端 Python 运行环境，从基础语法一路练到独立开发。">
   
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="styles.css?v=52">
+  <link rel="stylesheet" href="styles.css?v=53">
   
   <!-- Early global error handler (拦截脚本加载失败与运行时错误) -->
   <script>
@@ -182,7 +182,7 @@
               </div>
               <button class="btn-console-clear" id="btn-clear-stdin" aria-label="清空标准输入">清空</button>
             </div>
-            <textarea aria-label="标准输入" id="stdin-input" class="stdin-input" spellcheck="false" placeholder="需要 input() 时，在这里按行输入。"></textarea>
+            <textarea aria-label="标准输入" id="stdin-input" class="stdin-input" spellcheck="false" placeholder="每行一个输入值"></textarea>
           </div>
 
           <div class="console-container">
@@ -248,7 +248,7 @@
                 <em>stdin</em>
               </div>
             </div>
-            <textarea aria-label="专注模式标准输入" id="focus-stdin-input" class="stdin-input" spellcheck="false" placeholder="需要 input() 时，在这里按行输入。"></textarea>
+            <textarea aria-label="专注模式标准输入" id="focus-stdin-input" class="stdin-input" spellcheck="false" placeholder="每行一个输入值"></textarea>
           </div>
           <div class="console-container focus-console-panel">
             <div class="console-header">
@@ -286,8 +286,8 @@
   <script src="advanced_lessons.js?v=4"></script>
   <script src="vendor/monaco/vs/loader.js"></script>
   <script src="ui/learning-store.js"></script>
-  <script src="ui/code-editor.js?v=2"></script>
+  <script src="ui/code-editor.js?v=3"></script>
   <script src="ui/python-runner.js"></script>
-  <script src="app.js?v=55"></script>
+  <script src="app.js?v=56"></script>
 </body>
 </html>
