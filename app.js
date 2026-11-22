@@ -735,6 +735,48 @@ function toggleSound() {
   }
 }
 
+// The on-screen keyboard can shrink and pan the visual viewport while the layout viewport stays tall.
+function bindEditingViewport() {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+  const body = document.body;
+  const narrow = window.matchMedia('(max-width: 1024px)');
+  let frame = 0;
+
+  function update() {
+    frame = 0;
+    const focused = document.activeElement;
+    const inEditor = focused?.closest('#coding-panel, #focus-modal') &&
+      (focused.matches('textarea, input') || focused.isContentEditable);
+    const editing = inEditor || body.classList.contains('editing-viewport');
+    const codeVisible = document.querySelector('.dashboard-main').dataset.view === 'code' ||
+      body.classList.contains('focus-mode-open');
+    const active = narrow.matches && editing && codeVisible && viewport.scale === 1 &&
+      document.documentElement.clientHeight - viewport.height > 100;
+    body.classList.toggle('editing-viewport', Boolean(active));
+    if (active) {
+      body.style.setProperty('--editing-height', viewport.height + 'px');
+      body.style.setProperty('--editing-top', viewport.offsetTop + 'px');
+    } else {
+      body.style.removeProperty('--editing-height');
+      body.style.removeProperty('--editing-top');
+    }
+  }
+  function schedule() {
+    if (!frame) frame = requestAnimationFrame(update);
+  }
+  viewport.addEventListener('resize', schedule);
+  viewport.addEventListener('scroll', schedule);
+  window.addEventListener('resize', schedule);
+  document.addEventListener('focusin', schedule);
+  document.addEventListener('focusout', schedule);
+  // Keep a keyboard dismissal from moving these buttons between press and click.
+  document.addEventListener('mousedown', event => {
+    if (body.classList.contains('editing-viewport') &&
+        event.target.closest('#btn-run, #btn-submit, #btn-focus-run, .stop-run')) event.preventDefault();
+  });
+}
+
 // Event Bindings on DOM load
 document.addEventListener("DOMContentLoaded", async () => {
   const lockOverlay = document.getElementById('lock-overlay');
@@ -827,6 +869,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   initAnswerPanelControls();
   bindFocusEditorShortcuts();
+  bindEditingViewport();
 
   // Theme toggle button action
   const btnTheme = document.getElementById('btn-theme');

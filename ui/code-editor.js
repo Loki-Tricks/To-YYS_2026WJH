@@ -2,6 +2,8 @@ function createCodeEditor(host, { value, onEdit, onRun }) {
   const field = document.createElement('textarea');
   field.className = 'fallback-code-editor';
   field.spellcheck = false;
+  field.autocapitalize = 'off';
+  field.setAttribute('autocorrect', 'off');
   field.value = value;
   field.setAttribute('aria-label', 'Python 代码编辑器');
   field.addEventListener('input', () => onEdit(field.value));
@@ -66,6 +68,11 @@ function createCodeEditor(host, { value, onEdit, onRun }) {
         padding: { top: 16, bottom: 12 }, ariaLabel: 'Python 代码编辑器'
       });
       phone.addEventListener('change', () => enhanced?.updateOptions(typeOptions()));
+      enhanced.onDidLayoutChange(() => {
+        if (enhanced.hasTextFocus() && document.body.classList.contains('editing-viewport')) {
+          enhanced.revealPositionInCenterIfOutsideViewport(enhanced.getPosition(), monaco.editor.ScrollType.Immediate);
+        }
+      });
       enhanced.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, onRun);
       enhanced.onDidChangeModelContent(() => onEdit(enhanced.getValue()));
       if (focused) {

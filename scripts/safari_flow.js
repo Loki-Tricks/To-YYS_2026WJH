@@ -66,6 +66,48 @@
     check(read('completedLessons.length') === expectedCount, element('console-log').textContent);
   }
 
+  // Exercise the keyboard layout with synthetic visual viewport metrics in desktop Safari.
+  async function verifyEditingViewport() {
+    const win = frame.contentWindow;
+    const viewport = win.visualViewport;
+    const editor = read('monaco.editor.getEditors()[0]');
+    const initialSize = frame.style.cssText;
+    const originalCode = editor.getValue();
+    try {
+      frame.style.width = '390px';
+      win.document.querySelector('.mobile-nav [data-view="code"]').click();
+      editor.setValue('# line\n'.repeat(25) + 'print(26)');
+      const last = editor.getModel().getLineCount();
+      editor.focus();
+      editor.setPosition({ lineNumber: last, column: 1 });
+      editor.revealLine(last);
+      for (const [width, height, visible, top] of [[390, 780, 370, 40], [320, 568, 258, 0], [844, 390, 185, 12]]) {
+        frame.style.width = width + 'px';
+        frame.style.height = height + 'px';
+        Object.defineProperty(viewport, 'height', { configurable: true, value: visible });
+        Object.defineProperty(viewport, 'offsetTop', { configurable: true, value: top });
+        viewport.dispatchEvent(new win.Event('resize'));
+        await delay(150);
+        check(editor.getVisibleRanges().some(r => r.startLineNumber <= last && r.endLineNumber >= last),
+          'Caret hidden after viewport shrink');
+        for (const id of ['btn-run', 'btn-submit']) {
+          const button = element(id);
+          const r = button.getBoundingClientRect();
+          const hit = win.document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          check(r.height >= 44 && r.top >= top && r.bottom <= top + visible && button.contains(hit),
+            'Action outside keyboard viewport: ' + id);
+        }
+      }
+    } finally {
+      delete viewport.height;
+      delete viewport.offsetTop;
+      viewport.dispatchEvent(new win.Event('resize'));
+      frame.style.cssText = initialSize;
+      editor.setValue(originalCode);
+    }
+    await wait(() => !win.document.body.classList.contains('editing-viewport'), 'Keyboard layout stuck');
+  }
+
   async function verifyAnswerLayout() {
     const doc = frame.contentDocument;
     const originalSize = frame.style.cssText;
@@ -150,6 +192,7 @@
       }
       click('btn-answer-panel-close');
     }
+    await verifyEditingViewport();
     frame.style.width = '100%';
     click('btn-focus-code');
     element('focus-code-editor').value = "print(input(), end='')";

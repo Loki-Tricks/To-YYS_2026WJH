@@ -343,6 +343,42 @@ button { color: inherit; }
   .editor-actions { width: 100%; }
   .editor-actions button { flex: 1; }
 }
+/* Keep the controls and the editing surface inside Safari's visible area while typing. */
+.editing-viewport .app-container, .editing-viewport .focus-modal,
+.editing-viewport .modal-overlay, .editing-viewport .confirm-modal-overlay {
+  position: fixed; inset: var(--editing-top) 0 auto; height: var(--editing-height);
+}
+.editing-viewport .app-header { display: none; }
+.editing-viewport .mobile-nav { margin: 2px 6px 0; }
+.editing-viewport .dashboard-main { padding: 4px 6px; }
+.editing-viewport .workspace-panel, .editing-viewport .workspace-panel:has(.answer-panel.active) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(76px, 1fr) minmax(64px, .5fr);
+  grid-template-areas: "controls submit" "code code" "io io"; gap: 4px;
+  align-content: stretch;
+}
+.editing-viewport .editor-container { display: contents; }
+.editing-viewport .editor-header { grid-area: controls; border: 0; background: transparent; padding: 0; }
+.editing-viewport .editor-title { display: none; }
+.editing-viewport .editor-actions { width: 100%; gap: 3px; flex-wrap: nowrap; }
+.editing-viewport .editor-actions button { flex: 1; min-width: 0; min-height: 44px; padding: 4px; }
+.editing-viewport .submit-action-row { grid-area: submit; }
+.editing-viewport .btn-submit-wide { min-width: 0; min-height: 44px; padding: 4px 8px; }
+.editing-viewport .btn-submit-wide span { display: none; }
+.editing-viewport .editor-body { grid-area: code; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; }
+.editing-viewport .runtime-panels { grid-area: io; }
+.editing-viewport .stdin-header, .editing-viewport .console-header { padding: 2px 6px; }
+.editing-viewport .stdin-input, .editing-viewport .console-body { padding: 4px 8px; }
+.editing-viewport .answer-panel.active { grid-area: auto / 1 / auto / -1; min-height: 132px; }
+.editing-viewport .focus-modal { padding: 4px; }
+.editing-viewport .focus-dialog { height: 100%; width: 100%; }
+@media (min-width: 641px) {
+  .editing-viewport .workspace-panel, .editing-viewport .workspace-panel:has(.answer-panel.active) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); grid-template-rows: auto minmax(64px, 1fr);
+    grid-template-areas: "controls submit" "code io";
+  }
+  .editing-viewport .btn-submit-wide { justify-content: center; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
