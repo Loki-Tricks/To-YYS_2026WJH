@@ -66,6 +66,31 @@
     check(read('completedLessons.length') === expectedCount, element('console-log').textContent);
   }
 
+  async function verifyAnswerLayout() {
+    const doc = frame.contentDocument;
+    const originalSize = frame.style.cssText;
+    read('loadLesson(25)');
+    check(element('lesson-detail-title').querySelector('small')?.textContent.includes('super()'),
+      'Nested parentheses lost from lesson subtitle');
+    doc.querySelector('.mobile-nav [data-view="code"]').click();
+    const originalOutput = element('console-log').textContent;
+    click('btn-reveal-solution');
+    for (const [width, height] of [[320, 568], [844, 320]]) {
+      frame.style.width = width + 'px';
+      frame.style.height = height + 'px';
+      await delay(100);
+      const answer = doc.querySelector('.answer-panel-body').getBoundingClientRect();
+      const editor = element('monaco-editor-body').getBoundingClientRect();
+      const submit = element('btn-submit').getBoundingClientRect();
+      check(answer.height >= 72 && editor.height >= 48 && submit.bottom <= element('coding-panel').getBoundingClientRect().bottom + 1,
+        'Answer, editor or submit clipped at ' + width + 'x' + height);
+      check(answer.right <= editor.left || answer.bottom <= editor.top, 'Answer covers editor');
+    }
+    click('btn-answer-panel-close');
+    check(element('console-log').textContent === originalOutput, 'Answer toggle changed program output');
+    frame.style.cssText = originalSize;
+  }
+
   try {
     await report({ message: navigator.userAgent });
     await navigate();
@@ -117,8 +142,9 @@
       check(rect.left >= 0 && rect.right <= width + 1 && rect.width > 120, 'Drawer clipped at ' + width);
       const editorBounds = element('monaco-editor-body').getBoundingClientRect();
       if (width <= 1024) {
-        check(rect.bottom <= editorBounds.top && element('btn-submit').getBoundingClientRect().top >= rect.bottom,
-          'Answer covers editor or submit at ' + width);
+        const submit = element('btn-submit').getBoundingClientRect();
+        check((rect.bottom <= editorBounds.top || rect.right <= editorBounds.left) &&
+          (rect.bottom <= submit.top || rect.right <= submit.left), 'Answer covers editor or submit at ' + width);
       } else {
         check(rect.right <= editorBounds.left, 'Answer overlaps desktop editor at ' + width);
       }
@@ -173,6 +199,7 @@
     }
     await navigate(true);
     check(read('completedLessons.length === 100 && currentLessonIndex === 99'), 'Graduation lost');
+    await verifyAnswerLayout();
     const directory = frame.contentDocument.querySelector('.mobile-nav [data-view="map"]');
     if (directory.offsetWidth) directory.click();
     const firstChapter = frame.contentDocument.querySelector('.level-group');

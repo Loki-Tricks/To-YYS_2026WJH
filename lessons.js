@@ -71,7 +71,7 @@ x = 10
 y = 20
 total = x + y  # 计算 10 + 20，并把 30 存入 total 变量中
 \`\`\``,
-    task: "请在右侧编写代码：\n1. 创建一个变量 `a` 并赋值为 `23`\n2. 创建一个变量 `b` 并赋值为 `34`\n3. 创建一个变量 `c`，使其值为 `a` 和 `b` 的乘积（使用 `*` 运算符）。",
+    task: "请编写代码：\n1. 创建一个变量 `a` 并赋值为 `23`\n2. 创建一个变量 `b` 并赋值为 `34`\n3. 创建一个变量 `c`，使其值为 `a` 和 `b` 的乘积（使用 `*` 运算符）。",
     hint: "使用乘号 `*` 进行乘法运算。代码写法：\na = 23\nb = 34\nc = a * b",
     defaultCode: "# 声明变量并进行乘法运算\n",
     solution: "a = 23\nb = 34\nc = a * b",
@@ -110,7 +110,7 @@ print(9 // 4)  # 输出: 2
 print(9 % 4)   # 输出: 1
 print(3 ** 3)  # 输出: 27
 \`\`\``,
-    task: "请在右侧写出代码计算以下三个算式，并将结果依次存入对应的变量中：\n1. `17` 对 `5` 进行整除，结果存入变量 `div_val`\n2. `17` 对 `5` 求余数，结果存入变量 `mod_val`\n3. 计算 `5` 的 `4` 次方，结果存入变量 `power_val`",
+    task: "请写出代码计算以下三个算式，并将结果依次存入对应的变量中：\n1. `17` 对 `5` 进行整除，结果存入变量 `div_val`\n2. `17` 对 `5` 求余数，结果存入变量 `mod_val`\n3. 计算 `5` 的 `4` 次方，结果存入变量 `power_val`",
     hint: "使用 // 计算整除，使用 % 计算余数，使用 ** 计算幂运算：\ndiv_val = 17 // 5\nmod_val = 17 % 5\npower_val = 5 ** 4",
     defaultCode: "# 编写代码计算整除、求余和幂运算\n",
     solution: "div_val = 17 // 5\nmod_val = 17 % 5\npower_val = 5 ** 4",
@@ -285,7 +285,7 @@ while count <= 5:
     print(count)
     count = count + 1  # 每次自增 1，直到 count 变为 6，循环结束
 \`\`\``,
-    task: "使用 `while` 循环计算从 `1` 累加到 `100`（包含 100）的累加和，并将最终的和存储在变量 `sum_val` 中。初始变量已经在右侧声明好。",
+    task: "使用 `while` 循环计算从 `1` 累加到 `100`（包含 100）的累加和，并将最终的和存储在变量 `sum_val` 中。初始变量已经在编辑器中声明好。",
     hint: "循环条件是 num <= 100。在循环体里，将 num 累加到 sum_val 中，再将 num 加 1：\nwhile num <= 100:\n    sum_val = sum_val + num\n    num = num + 1",
     defaultCode: "sum_val = 0\nnum = 1\n# 在下方使用 while 循环计算 1 到 100 的累加和\n",
     solution: "sum_val = 0\nnum = 1\nwhile num <= 100:\n    sum_val = sum_val + num\n    num = num + 1",
@@ -491,7 +491,7 @@ print(user["name"])    # 输出: "Alice"
 user["age"] = 21       # 修改 age 的值为 21
 user["email"] = "a@x.com" # 新增键值对
 \`\`\``,
-    task: "请在右侧编写代码：\n1. 创建一个名为 `hero` 的字典，包含两个初始键值对：`\"name\"` 对应 `\"亚瑟\"`，`\"role\"` 对应 `\"战士\"`。\n2. 将 `hero` 的 `\"role\"` 修改为 `\"坦克\"`。\n3. 为 `hero` 新增一个键值对：`\"hp\"` 对应数字 `4500`。",
+    task: "请编写代码：\n1. 创建一个名为 `hero` 的字典，包含两个初始键值对：`\"name\"` 对应 `\"亚瑟\"`，`\"role\"` 对应 `\"战士\"`。\n2. 将 `hero` 的 `\"role\"` 修改为 `\"坦克\"`。\n3. 为 `hero` 新增一个键值对：`\"hp\"` 对应数字 `4500`。",
     hint: "hero = {\"name\": \"亚瑟\", \"role\": \"战士\"}\nhero[\"role\"] = \"坦克\"\nhero[\"hp\"] = 4500",
     defaultCode: "# 编写代码声明并修改 hero 字典\n",
     solution: "hero = {\"name\": \"亚瑟\", \"role\": \"战士\"}\nhero[\"role\"] = \"坦克\"\nhero[\"hp\"] = 4500",
@@ -705,7 +705,7 @@ def add_one():
 def welcome(name, title="同学"): # title 默认值为 "同学"
     return f"欢迎，{name}{title}!"
 \`\`\``,
-    task: "请在右侧编写代码：\n1. 定义一个全局变量 `visitor_count = 0`。\n2. 定义一个函数 `record_visit(name, vip_status=False)`。函数接收姓名 `name` 和可选参数 `vip_status`（默认值为 `False`）。\n3. 函数体内：需要修改全局变量 `visitor_count`（将其值加 1），并返回欢迎字符串。如果是 VIP，返回 `\"Welcome VIP {name}!\"`；否则返回 `\"Welcome {name}!\"`。",
+    task: "请编写代码：\n1. 定义一个全局变量 `visitor_count = 0`。\n2. 定义一个函数 `record_visit(name, vip_status=False)`。函数接收姓名 `name` 和可选参数 `vip_status`（默认值为 `False`）。\n3. 函数体内：需要修改全局变量 `visitor_count`（将其值加 1），并返回欢迎字符串。如果是 VIP，返回 `\"Welcome VIP {name}!\"`；否则返回 `\"Welcome {name}!\"`。",
     hint: "record_visit 里使用 global visitor_count。根据 vip_status 判定返回不同的问候语。例如：\nvisitor_count = 0\ndef record_visit(name, vip_status=False):\n    global visitor_count\n    visitor_count += 1\n    if vip_status:\n        return f\"Welcome VIP {name}!\"\n    return f\"Welcome {name}!\"",
     defaultCode: "# 声明全局变量，并编写 record_visit 函数\n",
     solution: "visitor_count = 0\ndef record_visit(name, vip_status=False):\n    global visitor_count\n    visitor_count += 1\n    if vip_status:\n        return f\"Welcome VIP {name}!\"\n    return f\"Welcome {name}!\"",
@@ -1062,7 +1062,7 @@ class Dog:
 my_dog = Dog("旺财") # 实例化一个对象
 print(my_dog.bark()) # 输出: "旺财 汪汪叫！"
 \`\`\``,
-    task: "请在右侧编写代码：\n1. 定义一个名为 `Student` 的类。\n2. 编写其构造方法 `__init__(self, name, score)`，接收并初始化属性 `self.name` 和 `self.score`。\n3. 编写一个实例方法 `is_passed(self)`。如果属性 `self.score` 大于或等于 `60`，返回 `True`；否则返回 `False`。",
+    task: "请编写代码：\n1. 定义一个名为 `Student` 的类。\n2. 编写其构造方法 `__init__(self, name, score)`，接收并初始化属性 `self.name` 和 `self.score`。\n3. 编写一个实例方法 `is_passed(self)`。如果属性 `self.score` 大于或等于 `60`，返回 `True`；否则返回 `False`。",
     hint: "注意类的方法首个参数永远是 self！构造方法名必须是 __init__（前后都是双下划线）。例如：\nclass Student:\n    def __init__(self, name, score):\n        self.name = name\n        self.score = score\n    def is_passed(self):\n        return self.score >= 60",
     defaultCode: "# 在下方编写 Student 类及构造方法、实例方法\n",
     solution: "class Student:\n    def __init__(self, name, score):\n        self.name = name\n        self.score = score\n    def is_passed(self):\n        return self.score >= 60",
@@ -1113,7 +1113,7 @@ class Manager(Employee):
     def get_salary(self): # 重写父类的方法
         return super().get_salary() + self.bonus
 \`\`\``,
-    task: "请在右侧实现以下类关系：\n1. 定义一个基类 `Animal`，其构造方法 `__init__(self, name)` 初始化属性 `self.name`，且定义实例方法 `make_sound(self)` 返回字符串 `\"Some sound\"`。\n2. 定义继承自 `Animal` 的子类 `Cat`。其构造方法接收 `name` 和 `color` 两个参数，需调用 `super().__init__(name)` 初始化父类属性，并将 `color` 属性存入 `self.color`。\n3. 重写 `Cat` 的 `make_sound(self)` 方法，让其返回字符串 `\"Meow\"`。",
+    task: "请实现以下类关系：\n1. 定义一个基类 `Animal`，其构造方法 `__init__(self, name)` 初始化属性 `self.name`，且定义实例方法 `make_sound(self)` 返回字符串 `\"Some sound\"`。\n2. 定义继承自 `Animal` 的子类 `Cat`。其构造方法接收 `name` 和 `color` 两个参数，需调用 `super().__init__(name)` 初始化父类属性，并将 `color` 属性存入 `self.color`。\n3. 重写 `Cat` 的 `make_sound(self)` 方法，让其返回字符串 `\"Meow\"`。",
     hint: " 类的继承与 super() 写法：\nclass Animal:\n    def __init__(self, name):\n        self.name = name\n    def make_sound(self):\n        return \"Some sound\"\n\nclass Cat(Animal):\n    def __init__(self, name, color):\n        super().__init__(name)\n        self.color = color\n    def make_sound(self):\n        return \"Meow\"",
     defaultCode: "# 在下方定义基类 Animal 与子类 Cat\n",
     solution: "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def make_sound(self):\n        return \"Some sound\"\n\nclass Cat(Animal):\n    def __init__(self, name, color):\n        super().__init__(name)\n        self.color = color\n    def make_sound(self):\n        return \"Meow\"",
@@ -1165,7 +1165,7 @@ p1 = Point(1, 2)
 print(p1) # 输出: "(1, 2)" 而不是 "<__main__.Point object at 0x...>"
 print(p1 == Point(1, 2)) # 输出: True
 \`\`\``,
-    task: "请在右侧为已给出框架的 `Book` 类实现两个魔法方法：\n1. 重写 `__str__(self)` 魔法方法，返回格式为 `\"《书名》作者: 作者名\"` 的字符串。\n2. 重写 `__eq__(self, other)` 魔法方法：如果对比的 `other` 对象也是 `Book` 的实例（可以使用 `isinstance(other, Book)` 判断），且它们的 `title` 与 `author` 都完全相同，则返回 `True`；否则返回 `False`。",
+    task: "请为已给出框架的 `Book` 类实现两个魔法方法：\n1. 重写 `__str__(self)` 魔法方法，返回格式为 `\"《书名》作者: 作者名\"` 的字符串。\n2. 重写 `__eq__(self, other)` 魔法方法：如果对比的 `other` 对象也是 `Book` 的实例（可以使用 `isinstance(other, Book)` 判断），且它们的 `title` 与 `author` 都完全相同，则返回 `True`；否则返回 `False`。",
     hint: " 编写方法：\nclass Book:\n    def __init__(self, title, author):\n        self.title = title\n        self.author = author\n    def __str__(self):\n        return f\"《{self.title}》作者: {self.author}\"\n    def __eq__(self, other):\n        if not isinstance(other, Book):\n            return False\n        return self.title == other.title and self.author == other.author",
     defaultCode: "class Book:\n    def __init__(self, title, author):\n        self.title = title\n        self.author = author\n    \n    # 1. 编写 __str__ 魔法方法\n    \n    # 2. 编写 __eq__ 魔法方法\n",
     solution: "class Book:\n    def __init__(self, title, author):\n        self.title = title\n        self.author = author\n    def __str__(self):\n        return f\"《{self.title}》作者: {self.author}\"\n    def __eq__(self, other):\n        if not isinstance(other, Book):\n            return False\n        return self.title == other.title and self.author == other.author",
@@ -1328,7 +1328,7 @@ pip install -r requirements.txt
 - \`add_student(self, student)\`：往列表里添加一个 Student 实例。
 - \`get_top_student(self)\`：使用 \`lambda\`，从学生列表中找到**平均成绩最高**的学生实例并返回。如果列表为空，则返回 \`None\`。
 - \`save_to_json(self, filepath)\`：使用 \`with open\` 和 \`json.dump()\`（或 \`json.write\` 结合 dumps），将所有学生的数据（包含 name 和 scores 的字典列表）序列化写入 \`filepath\` 路径代表的文本文件中。`,
-    task: "请在右侧完整定义 `Student` 和 `StudentManager` 两个类，并根据上述逻辑实现其构造方法及功能方法。",
+    task: "请完整定义 `Student` 和 `StudentManager` 两个类，并根据上述逻辑实现其构造方法及功能方法。",
     hint: "可以使用内置 max() 函数结合 lambda 实现最强学生查找：\nmax(self.students, key=lambda s: s.get_average())\nsave_to_json 时，将每个学生的信息导出为字典 {'name': s.name, 'scores': s.scores}，放入列表中，然后 json.dump() 写入文件。",
     defaultCode: "import json\n\nclass Student:\n    # 声明构造方法和 get_average\n    pass\n\nclass StudentManager:\n    # 声明构造方法、add_student、get_top_student、save_to_json\n    pass\n",
     solution: "import json\n\nclass Student:\n    def __init__(self, name, scores):\n        self.name = name\n        self.scores = scores\n    def get_average(self):\n        if not self.scores:\n            return 0\n        return sum(self.scores.values()) / len(self.scores)\n\nclass StudentManager:\n    def __init__(self):\n        self.students = []\n    def add_student(self, student):\n        self.students.append(student)\n    def get_top_student(self):\n        if not self.students:\n            return None\n        return max(self.students, key=lambda s: s.get_average())\n    def save_to_json(self, filepath):\n        data = []\n        for s in self.students:\n            data.append({\"name\": s.name, \"scores\": s.scores})\n        with open(filepath, \"w\", encoding=\"utf-8\") as f:\n            json.dump(data, f)",

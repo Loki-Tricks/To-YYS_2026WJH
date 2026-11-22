@@ -111,11 +111,13 @@ resizeCanvas();
 function createParticles() {
   particles = [];
   const colors = ['#94714D', '#D4A373', '#528062', '#E8C547', '#E0A96D', '#B5838D'];
-  for (let i = 0; i < 120; i++) {
+  const compact = canvas.width <= 640;
+  const count = compact ? 30 : 120;
+  for (let i = 0; i < count; i++) {
     particles.push({
       x: canvas.width / 2,
       y: canvas.height / 2 - 50,
-      radius: Math.random() * 5 + 3,
+      radius: compact ? Math.random() * 2 + 2 : Math.random() * 5 + 3,
       color: colors[Math.floor(Math.random() * colors.length)],
       vx: (Math.random() - 0.5) * 15,
       vy: (Math.random() - 0.6) * 15 - 5,
@@ -289,7 +291,7 @@ function hideSuccessModal() {
 // Course titles can include a parenthetical topic after the lesson name.
 function lessonHeading(lesson) {
   const title = lesson.title.replace(/^\d+\.\s*/, '');
-  const parts = title.match(/^(.+?)\s+\(([^()]+)\)$/);
+  const parts = title.match(/^(.+?)\s+\((.+)\)$/);
   return parts ? { name: parts[1], topic: parts[2] } : { name: title, topic: '' };
 }
 
@@ -570,14 +572,13 @@ function openAnswerPanel() {
   if (!panel || !codeView || !titleText) return;
 
   const lesson = lessons[currentLessonIndex];
-  titleText.innerText = `${lesson.title} · 参考答案`;
+  titleText.textContent = `第 ${lesson.id} 关 · 参考答案`;
   codeView.textContent = lesson.solution;
   panel.classList.add('active');
   panel.setAttribute('aria-hidden', 'false');
   syncAnswerPanelBounds();
   updateAnswerButton(true);
   playSound('click');
-  appendConsole("已打开参考答案面板，编辑器仍可继续编写。", "system");
 }
 
 // Toggle readonly floating answer viewer
@@ -586,7 +587,6 @@ function revealSolution() {
   if (panel && panel.classList.contains('active')) {
     closeAnswerPanel();
     playSound('click');
-    appendConsole("已取消查看参考答案。", "system");
   } else {
     openAnswerPanel();
   }
@@ -653,6 +653,8 @@ function openFocusMode() {
 
   if (activeRun) return;
   closeAnswerPanel();
+  const lesson = lessons[currentLessonIndex];
+  document.getElementById('focus-lesson-name').textContent = `第 ${lesson.id} 关 · ${lessonHeading(lesson).name}`;
   focusEditor.value = getEditorValue();
   focusStdin.value = mainStdin ? mainStdin.value : '';
   focusConsole.innerHTML = document.getElementById('console-log').innerHTML;
@@ -771,7 +773,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } catch (soundErr) {
         console.warn(soundErr);
       }
-      showToast("✨ 专属修炼场已解锁，祝你生日快乐！🎂", 'success');
+      showToast("修炼手册已解锁，生日快乐！", 'success');
     } else {
       try {
         playSound('fail');
